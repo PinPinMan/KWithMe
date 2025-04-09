@@ -1,0 +1,76 @@
+name: kwithme-development
+ 
+services:
+  host_database:
+    build:
+      context: ./database
+      dockerfile: Dockerfile
+    image: kwithme--mysql-57:doaa
+    container_name: kwithme--mysql-57--container
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./database/logs:/var/log/mysql
+      - ./database/data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=somepassword
+    networks:
+      - kwithme_network
+
+  host_backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: kwithme--backend:doaa
+    container_name: kwithme--backend--container
+    ports:
+      - "5001:5000"
+      - "5679:5679" # For debugging
+    volumes:
+      - ./backend/app:/my_backend_app/app
+    depends_on:
+      - host_database
+    networks:
+      - kwithme_network
+
+  # host_backend-render:
+  #   build:
+  #     context: ./backend
+  #     dockerfile: Dockerfile.render
+  #   image: kwithme--backend--render:doaa
+  #   container_name: kwithme--backend--render--container
+  #   ports:
+  #     - "5001:5000"
+  #     - "5679:5679" # For debugging
+  #   networks:
+  #     - kwithme_network
+      
+  # host_frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   image: kwithme--frontend:doaa
+  #   container_name: kwithme--frontend--container
+  #   ports:
+  #     - "5002:5000"
+  #     - "5678:5678" # For debugging
+  #   volumes:
+  #     - ./frontend/app:/my_frontend_app/app
+  #   networks:
+  #     - kwithme_network
+
+  # host_frontend_render:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile.render
+  #   image: kwithme--frontend--render:doaa
+  #   container_name: kwithme--frontend--render--container
+  #   ports:
+  #     - "5002:8000"
+  #     - "5680:5678" # For debugging
+  #   networks:
+  #     - kwithme_network
+
+networks:
+  kwithme_network:
+    driver: bridge
